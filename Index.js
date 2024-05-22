@@ -34,15 +34,15 @@ app.use(IpFilter(allowedIps, { mode: "allow", log: false }));
 // Middleware to check referrer and update the hash
 app.use((req, res, next) => {
 	const referrer = req.get("referrer");
-	if (referrer && referrer.includes("linkvertise.com")) {
+	if (referrer && referrer.includes("*.linkvertise.com")) {
 		currentHash = generateTimestampHash();
 	}
 	next();
 });
 
-// Route to serve the current hash
-app.get("/api/getkey", (req, res) => {
-	res.send(currentHash);
+// Route to serve the current hash in JSON format
+app.get('/api/getkey', (req, res) => {
+    res.json({ key: currentHash });
 });
 
 // Route to authenticate the hash
