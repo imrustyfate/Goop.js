@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 
 // Route to serve the current hash in JSON format
 app.get('/api/getkey', (req, res) => {
-    res.json({ key: currentHash });
+    res.send(currentHash);
 });
 
 // Route to authenticate the hash
