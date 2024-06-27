@@ -115,6 +115,41 @@ app.get("/api/getkey", (req, res) => {
   }
 });
 
+app.get("/api/getkeyy", (req, res) => {
+  const referer = req.get("Referer");
+  console.log(referer);
+  const ipAddress = getLocalIpAddress();
+  console.log(`Local IP Address: ${ipAddress}`);
+  // Check if the referer is blacklisted
+  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city")) {
+    res.send("phuck u");
+    return;
+  }
+
+  // Check if the checkpoint is set
+  if (checkpoint !== 0) {
+    res.send("phuck u");
+    return;
+  }
+
+  checkpoint = 1;
+
+  // If in debug mode, reset the checkpoint
+  if (DEBUG_MODE) {
+    checkpoint = 0;
+  }
+
+  // Get the key from the session
+  KEY = req.session.key;
+
+  // Send the key if it exists, otherwise send an error message
+  if (KEY) {
+    res.send(KEY);
+  } else {
+    res.send("phuck u");
+  }
+});
+
 // Route to authenticate the hash
 app.get("/api/authenticate", (req, res) => {
   const ipAddress = getLocalIpAddress();
