@@ -86,10 +86,7 @@ app.get("/api/getkey", (req, res) => {
   const ipAddress = getLocalIpAddress();
   console.log(`Local IP Address: ${ipAddress}`);
   // Check if the referer is blacklisted
-  if (
-    (referer && !referer.includes("linkvertise.com")) ||
-    (referer && referer.includes("bypass.city"))
-  ) {
+  if (referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city") || referer == 'undefined') {
     res.send("phuck u");
     return;
   }
