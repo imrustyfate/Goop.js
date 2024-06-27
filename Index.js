@@ -67,11 +67,6 @@ const getLocalIpAddress = () => {
 
 // Middleware to ensure key existence and validity
 app.use((req, res, next) => {
-  const referer = req.get('Referer');
-  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city")) {
-    res.send("phuck u");
-    return;
-  }
   const now = Date.now();
   const keyExpiration = req.session.keyExpiration || 0;
 
@@ -91,7 +86,7 @@ app.get("/api/getkey", (req, res) => {
   const ipAddress = getLocalIpAddress();
   console.log(`Local IP Address: ${ipAddress}`);
   // Check if the referer is blacklisted
-  if (referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city")) {
+  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city")) {
     res.send("phuck u");
     return;
   }
