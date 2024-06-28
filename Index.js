@@ -52,7 +52,8 @@ app.set("trust proxy", 1);
 // Function to generate a hash of the current timestamp
 function generateTimestampHash() {
   const timestamp = Date.now().toString();
-  return crypto.createHash("sha256").update(timestamp).digest("hex");
+  const randum = crypto.createHash("sha256").update(timestamp).digest("hex");
+  return crypto.createHash('sha256').update(randum).digest("hex");
 }
 
 // Function to get the local IP address
