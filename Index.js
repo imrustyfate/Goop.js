@@ -106,9 +106,6 @@ app.get("/api/getkey", (req, res) => {
 
   // Get the key from the session
   KEY = req.session.key;
-  if (KEY) {
-    SKEYEXPIRATION = Date.now() + 5;
-  }
 
   // Send the key if it exists, otherwise send an error message
   if (KEY) {
