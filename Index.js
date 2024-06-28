@@ -9,6 +9,9 @@ const os = require("os");
 const app = express();
 const PORT = 3000;
 const ONE_DAY_IN_MS = 5; // 24 hours in milliseconds
+let checkpoint = 0;
+let KEY = 0;
+let KEYEXPIRATION;
 const DEBUG_MODE = true;
 const BLACKLIST = ["bypass.city"];
 
@@ -68,18 +71,15 @@ const getLocalIpAddress = () => {
 // Middleware to ensure key existence and validity
 app.use((req, res, next) => {
   const now = Date.now();
-  const keyExpiration = req.session.keyExpiration;
-  console.log(keyExpiration);
+  const keyExpiration = KEYEXPIRATION;
 
   if (!req.session.key || now > keyExpiration) {
     req.session.key = generateTimestampHash();
-    req.session.keyExpiration = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
+    KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
   }
   next();
 });
 
-let checkpoint = 0;
-let KEY = 0;
 
 app.get("/api/getkey", (req, res) => {
   const referer = req.get("Referer");
@@ -156,11 +156,11 @@ app.get("/api/authenticate", (req, res) => {
   const ipAddress = getLocalIpAddress();
   console.log(`Local IP Address: ${ipAddress}`);
   const hash = req.query.hash;
-  if (hash == KEY && Date.now() < req.session.keyExpiration) {
+  if (hash == KEY && Date.now() < KEYEXPIRATION) {
     res.send("Authentication successful");
     // Optionally, reset the key after successful authentication
-    req.session.key = null;
-    req.session.keyExpiration = null;
+    KEY = null;
+    KEYEXPIRATION = null;
   } else {
     res.send("Authentication failed");
   }
