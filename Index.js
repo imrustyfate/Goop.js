@@ -8,7 +8,7 @@ const os = require("os");
 
 const app = express();
 const PORT = 3000;
-const ONE_DAY_IN_MS = 5; // 24 hours in milliseconds
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 let checkpoint = 0;
 let KEY = 0;
 let KEYEXPIRATION;
@@ -71,9 +71,8 @@ const getLocalIpAddress = () => {
 // Middleware to ensure key existence and validity
 app.use((req, res, next) => {
   const now = Date.now();
-  const keyExpiration = KEYEXPIRATION;
 
-  if (!req.session.key || now > keyExpiration) {
+  if (!req.session.key && now > KEYEXPIRATION) {
     req.session.key = generateTimestampHash();
     KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
   }
@@ -124,6 +123,9 @@ app.get("/api/authenticate", (req, res) => {
   const ipAddress = getLocalIpAddress();
   console.log(`Local IP Address: ${ipAddress}`);
   const hash = req.query.hash;
+  if (Date.now() > KEYEXPIRATION) {
+    res.send('key expired :(');
+  }
   if (hash == KEY && Date.now() < KEYEXPIRATION) {
     res.send("Authentication successful");
   } else {
