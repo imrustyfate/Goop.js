@@ -158,8 +158,8 @@ app.get("/api/authenticate", (req, res) => {
   if (hash == KEY && Date.now() < req.session.keyExpiration) {
     res.send("Authentication successful");
     // Optionally, reset the key after successful authentication
-    req.session.key = generateTimestampHash();
-    req.session.keyExpiration = Date.now() + 1;
+    req.session.key = null;
+    req.session.keyExpiration = null;
   } else {
     res.send("Authentication failed");
   }
