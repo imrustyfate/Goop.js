@@ -114,7 +114,7 @@ app.get("/api/getkey", (req, res) => {
   if (KEY) {
     res.send(KEY);
   } else {
-    res.send("phuck u also error code of {req.session.key}");
+    res.send(`phuck u also error code of {req.session.key}`);
   }
 });
 
