@@ -76,6 +76,7 @@ app.use((req, res, next) => {
 
   if (!req.session.key || now < KEYEXPIRATION) {
     req.session.key = generateTimestampHash();
+    KEYGEN[req.session.key] = true;
     KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
   }
   next();
@@ -108,7 +109,6 @@ app.get("/api/getkey", (req, res) => {
 
   // Get the key from the session
   KEY = req.session.key;
-  KEYGEN[KEY] = true;
   if (KEYGEN[KEY]) {
     res.send('phuck u');
   }
