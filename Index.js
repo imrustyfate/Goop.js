@@ -89,7 +89,7 @@ app.get("/api/getkey", (req, res) => {
   const ipAddress = getLocalIpAddress();
   console.log(`Local IP Address: ${ipAddress}`);
   // Check if the referer is blacklisted
-  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city")) {
+  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city") || KEYGEN[req.session.key] == true) {
     res.send("phuck u");
     return;
   }
@@ -109,9 +109,6 @@ app.get("/api/getkey", (req, res) => {
 
   // Get the key from the session
   KEY = req.session.key;
-  if (KEYGEN[KEY]) {
-    res.send('phuck u');
-  }
 
   // Send the key if it exists, otherwise send an error message
   if (KEY) {
