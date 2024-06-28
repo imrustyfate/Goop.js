@@ -68,7 +68,8 @@ const getLocalIpAddress = () => {
 // Middleware to ensure key existence and validity
 app.use((req, res, next) => {
   const now = Date.now();
-  const keyExpiration = req.session.keyExpiration || 0;
+  const keyExpiration = req.session.keyExpiration;
+  console.log(keyExpiration);
 
   if (!req.session.key || now > keyExpiration) {
     req.session.key = generateTimestampHash();
