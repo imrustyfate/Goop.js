@@ -12,6 +12,7 @@ const ONE_DAY_IN_MS = 5; // 24 hours in milliseconds
 let checkpoint = 0;
 let KEY = 0;
 let KEYEXPIRATION;
+let KEYGEN = {};
 const DEBUG_MODE = true;
 const BLACKLIST = ["bypass.city"];
 
@@ -106,6 +107,10 @@ app.get("/api/getkey", (req, res) => {
 
   // Get the key from the session
   KEY = req.session.key;
+  KEYGEN[KEY] = true;
+  if (KEYGEN[KEY]) {
+    res.send('phuck u');
+  }
 
   // Send the key if it exists, otherwise send an error message
   if (KEY) {
