@@ -113,8 +113,8 @@ app.get("/api/getkey", (req, res) => {
   // Send the key if it exists, otherwise send an error message
   if (KEY) {
     res.send(KEY);
-  } else (i){
-    res.send("phuck u also error code of {i}");
+  } else {
+    res.send("phuck u also error code of {req.session.key}");
   }
 });
 
