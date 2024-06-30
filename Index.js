@@ -79,7 +79,7 @@ app.use((req, res, next) => {
     req.session.key = generateTimestampHash();
     KEYGEN[req.session.key] = true;
     KEYDURA[req.session.key] = now + ONE_DAY_IN_MS;
-    print(KEYDURA[req.session.key]);
+    console.log(KEYDURA[req.session.key]);
     KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
   }
   next();
