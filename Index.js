@@ -13,6 +13,7 @@ let checkpoint = 0;
 let KEY = 0;
 let KEYEXPIRATION;
 let KEYGEN = {};
+let KEYDURA = {};
 const DEBUG_MODE = true;
 const BLACKLIST = ["bypass.city"];
 
@@ -77,6 +78,8 @@ app.use((req, res, next) => {
   if (!req.session.key || now < KEYEXPIRATION) {
     req.session.key = generateTimestampHash();
     KEYGEN[req.session.key] = true;
+    KEYDURA[req.session.key] = now + ONE_DAY_IN_MS;
+    print(KEYDURA[req.session.key]);
     KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
   }
   next();
