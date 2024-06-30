@@ -130,7 +130,7 @@ app.get("/api/authenticate", (req, res) => {
   if (Date.now() > KEYEXPIRATION) {
     res.send('key expired :(');
   }
-  if (hash == KEY && Date.now() < KEYEXPIRATION) {
+  if (hash == KEY && Date.now() < DURA) {
     res.send("Authentication successful");
   } else {
     res.send("Authentication failed");
