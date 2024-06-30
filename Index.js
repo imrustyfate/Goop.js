@@ -11,6 +11,7 @@ const PORT = 3000;
 const ONE_DAY_IN_MS = 5; // 24 hours in milliseconds
 let checkpoint = 0;
 let KEY = 0;
+let DURA = 0;
 let KEYEXPIRATION;
 let KEYGEN = {};
 let KEYDURA = {};
@@ -75,9 +76,11 @@ const getLocalIpAddress = () => {
 app.use((req, res, next) => {
   const now = Date.now();
 
-  if (!req.session.key) {
+  if (!req.session.key || !req.session.dura) {
     req.session.key = generateTimestampHash();
+    KEY = req.session.key;
     req.session.dura = now + ONE_DAY_IN_MS;
+    DURA = req.session.dura
   }
   next();
 });
