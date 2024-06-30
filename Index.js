@@ -75,12 +75,9 @@ const getLocalIpAddress = () => {
 app.use((req, res, next) => {
   const now = Date.now();
 
-  if (!req.session.key || now < KEYEXPIRATION) {
+  if (!req.session.key && !req.session.dura) {
     req.session.key = generateTimestampHash();
-    KEYGEN[req.session.key] = true;
-    KEYDURA[req.session.key] = now + ONE_DAY_IN_MS;
-    console.log(KEYDURA[req.session.key]);
-    KEYEXPIRATION = now + ONE_DAY_IN_MS; // Key TTL of 24 hours
+    req.session.dura = now + ONE_DAY_IN_MS;
   }
   next();
 });
