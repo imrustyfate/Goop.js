@@ -75,7 +75,7 @@ const getLocalIpAddress = () => {
 app.use((req, res, next) => {
   const now = Date.now();
 
-  if (!req.session.key && !req.session.dura) {
+  if (!req.session.key) {
     req.session.key = generateTimestampHash();
     req.session.dura = now + ONE_DAY_IN_MS;
   }
@@ -109,6 +109,7 @@ app.get("/api/getkey", (req, res) => {
 
   // Get the key from the session
   KEY = req.session.key;
+  DURA = req.session.dura;
 
   // Send the key if it exists, otherwise send an error message
   if (KEY) {
