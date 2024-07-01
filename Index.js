@@ -49,7 +49,7 @@ app.get("/api/getkey", (req, res) => {
 
 // Route to authenticate the key
 app.get("/api/authenticate", (req, res) => {
-  const { key } = req.query;
+  const { key } = req.query.wl;
   if (!key || key !== req.session.key || Date.now() > req.session.expiresAt) {
     res.send("Authentication failed");
     return;
