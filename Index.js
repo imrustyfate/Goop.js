@@ -8,13 +8,12 @@ const os = require("os");
 
 const app = express();
 const PORT = 3000;
-const ONE_DAY_IN_MS = 5; // 24 hours in milliseconds
-let checkpoint = 0;
-let KEY = 0;
-let DURA = 0;
+const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+let KEY;
+let DURA;
 let KEYEXPIRATION;
 let KEYGEN = {};
-let KEYDURA = {};
+let checkpoint = 0;
 const DEBUG_MODE = true;
 const BLACKLIST = ["bypass.city"];
 
@@ -37,7 +36,9 @@ app.use(
     saveUninitialized: true,
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: ONE_DAY_IN_MS, // Adjust maxAge as needed
+      maxAge: ONE_DAY_IN_MS, // Session max age in milliseconds
+      httpOnly: true, // Ensures the cookie is only accessible via HTTP(S)
+      sameSite: true, // Ensures the cookie is only sent with same-site requests
       trustProxy: true,
     },
   })
@@ -54,90 +55,70 @@ app.set("trust proxy", 1);
 // Function to generate a hash of the current timestamp
 function generateTimestampHash() {
   const timestamp = Date.now().toString();
-  const randum = crypto.createHash("sha256").update(timestamp).digest("hex");
-  return crypto.createHash('sha256').update(randum).digest("hex");
+  return crypto.createHash("sha256").update(timestamp).digest("hex");
 }
-
-// Function to get the local IP address
-const getLocalIpAddress = () => {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const net of interfaces[name]) {
-      // Skip over non-ipv4 and internal (i.e., 127.0.0.1) addresses
-      if (net.family === "IPv4" && !net.internal) {
-        return net.address;
-      }
-    }
-  }
-  return null;
-};
 
 // Middleware to ensure key existence and validity
 app.use((req, res, next) => {
   const now = Date.now();
 
-  if (!req.session.key || !req.session.dura) {
+  if (!req.session.key || now > req.session.dura) {
     req.session.key = generateTimestampHash();
-    KEY = req.session.key;
     req.session.dura = now + ONE_DAY_IN_MS;
-    DURA = req.session.dura
+    req.session.keyGen = true; // Flag to indicate key generation for this session
+  }
+
+  // Calculate key expiration time
+  KEYEXPIRATION = req.session.dura;
+
+  next();
+});
+
+// Middleware to prevent key regeneration on page refresh
+app.use((req, res, next) => {
+  if (req.session.keyGen) {
+    // If key is generated in this session, prevent further generation
+    req.session.keyGen = false;
+  } else {
+    // If key is not generated in this session, send error or handle accordingly
+    res.status(403).send("Unauthorized"); // Example: Send 403 Forbidden
+    return;
   }
   next();
 });
 
-
+// Route to get the key
 app.get("/api/getkey", (req, res) => {
   const referer = req.get("Referer");
-  console.log(referer);
-  const ipAddress = getLocalIpAddress();
-  console.log(`Local IP Address: ${ipAddress}`);
-  // Check if the referer is blacklisted
-  if (!referer || referer && !referer.includes("linkvertise.com") || referer && referer.includes("bypass.city") || KEYGEN[req.session.key] == true) {
-    res.send("phuck u");
+  const ipAddress = req.ip;
+
+  // Check if the referer is blacklisted or if key generation is flagged
+  if (!referer || BLACKLIST.includes(referer) || !req.session.keyGen) {
+    res.status(403).send("Unauthorized");
     return;
   }
 
-  // Check if the checkpoint is set
-  if (checkpoint !== 0) {
-    res.send("phuck u");
-    return;
-  }
-
-  checkpoint = 1;
-
-  // If in debug mode, reset the checkpoint
-  if (DEBUG_MODE) {
-    checkpoint = 0;
-  }
-
-  // Get the key from the session
-  KEY = req.session.key;
-  DURA = req.session.dura;
-
-  // Send the key if it exists, otherwise send an error message
-  if (KEY) {
-    res.send(KEY);
-  } else {
-    res.send(`phuck u also error code of {req.session.key}`);
-  }
+  // Send the key if it exists in session
+  res.send(req.session.key);
 });
 
 // Route to authenticate the hash
 app.get("/api/authenticate", (req, res) => {
-  const ipAddress = getLocalIpAddress();
-  console.log(`Local IP Address: ${ipAddress}`);
   const hash = req.query.hash;
-  if (Date.now() > KEYEXPIRATION) {
-    res.send('key expired :(');
+
+  if (!hash || hash !== req.session.key || Date.now() > KEYEXPIRATION) {
+    res.status(403).send("Authentication failed");
+    return;
   }
-  if (hash == KEY && Date.now() < DURA) {
-    res.send("Authentication successful");
-  } else {
-    res.send("Authentication failed");
-  }
+
+  res.send("Authentication successful");
 });
 
-app.get("/ip", (req, res) => res.send(req.ip));
+// Route to display local IP address
+app.get("/ip", (req, res) => {
+  const ipAddress = req.ip;
+  res.send(`Your IP Address: ${ipAddress}`);
+});
 
 // Root route
 app.get("/", (req, res) => {
